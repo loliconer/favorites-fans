@@ -1,0 +1,160 @@
+@import (reference) "Bootstrapping/Mixins";
+
+.mod-cat-tree {
+  font-size: var(--small-font);
+
+  .t-tip {
+    padding: 4px var(--unit);
+    background-color: var(--bg-color);
+    display: inline-block;
+    border-radius: var(--border-radius);
+    margin-bottom: var(--unit);
+  }
+
+  .t-item {
+    cursor: default;
+  }
+
+  .i-name {
+    .flex-start;
+    line-height: 30px;
+    transition: color .2s;
+
+    &:hover {
+      color: var(--hover-blue);
+    }
+
+    .icon {
+      margin-right: 4px;
+    }
+  }
+
+  .i-add {
+    //padding-left: 24px;
+
+    .icon {
+      cursor: pointer;
+    }
+  }
+
+  .i-children {
+    padding-left: 24px;
+  }
+}
+
+.layout-form {
+  .v-row {
+    .flex-start;
+    margin-bottom: var(--3unit);
+
+    .label {
+      width: 100px;
+      font-size: var(--small-font);
+      color: var(--second-color);
+    }
+
+    .v-input, .v-select {
+      flex: 1;
+    }
+  }
+}
+
+.container {
+  background-color: var(--bg-color);
+}
+
+.search-wrap {
+  margin-top: 100px;
+  margin-bottom: var(--3unit);
+
+  .v-search {
+    width: 300px;
+    margin: 0 auto;
+  }
+}
+
+.actions {
+  text-align: center;
+  margin-bottom: var(--3unit);
+
+  .v-btn {
+    margin-right: var(--unit);
+  }
+}
+
+.content {
+  .section {
+    margin-bottom: var(--3unit);
+    background-color: var(--white);
+
+    .s-head {
+      position: relative;
+      display: flex;
+      align-items: center;
+
+      .h-title {
+        background-color: var(--blue-color);
+        width: 100px;
+        line-height: 40px;
+        text-align: center;
+        color: var(--white);
+      }
+
+      .h-nav {
+        flex: 1;
+        display: flex;
+        align-items: center;
+        height: 40px;
+        text-align: center;
+        border-bottom: 1px solid var(--border-color);
+
+        .v-tab {
+          .tabs {
+            .tab {
+              height: 39px;
+              line-height: 38px;
+            }
+          }
+        }
+      }
+    }
+
+    .s-body {
+      display: grid;
+      .b-item {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+      }
+    }
+  }
+}
+
+.mgr-panel {
+  padding: var(--unit);
+}
+
+.v-window {
+  .win-content {
+    overflow-y: inherit;
+  }
+}
+
+.v-tag {
+  .input {
+    width: 100px;
+  }
+
+  .t-candidates {
+    width: 388px;
+  }
+}
+
+.v-dropdown {
+  position: absolute;
+  z-index: 1010;
+
+  .d-item {
+    cursor: pointer;
+  }
+}
