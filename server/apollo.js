@@ -1,7 +1,11 @@
-const { ApolloServer } = require('apollo-server')
-const { gql } = require('apollo-server')
+const { ApolloServer, gql } = require('apollo-server')
 
 const schema = gql`
+  type MutationResponse {
+    code: String!
+    success: Boolean!
+    message: String!
+  }
   type Category {
     id: Int!
     serialNo: Int
@@ -20,6 +24,10 @@ const schema = gql`
     likers: Int
     createTime: Int
   }
+  input CategoryInput {
+    name: String!
+    parentId: Int
+  }
   input SiteInput {
     title: String!
     description: String
@@ -32,8 +40,8 @@ const schema = gql`
     sites: [Site]!
   }
   type Mutation {
-    createCategory(name: String!, parentId: Int): Int
-    updateCategory(id: Int!, name: String!): Int
+    createCategory(category: CategoryInput): Int
+    updateCategory(id: Int!, category: CategoryInput): Int
     deleteCategory(id: Int!): Int
     createSite(site: SiteInput): Int
   }
@@ -42,37 +50,31 @@ const schema = gql`
 const resolvers = {
   Query: {
     categories: async (_, { pageSize = 20, after }, { dataSources }, info) => {
-      return await dataSources.categoryAPI.get()
+      return await dataSources.ModalAPI.get('Category')
     },
     sites: async (_, {}, { dataSources }) => {
-      return await dataSources.SQLiteAPI.get('site')
+      return await dataSources.ModalAPI.get('Site')
     }
   },
   Mutation: {
-    createCategory: async (_, { name, parentId }, { dataSources }, info) => {
-      return await dataSources.categoryAPI.post(name, parentId)
+    createCategory: async (_, { category }, { dataSources }, info) => {
+      return await dataSources.ModalAPI.post('Category', category)
     },
-    updateCategory: async(_, { id, name }, { dataSources }, info) => {
-      return await dataSources.categoryAPI.put(id, name)
+    updateCategory: async(_, { id, category }, { dataSources }, info) => {
+      return await dataSources.ModalAPI.put('Category', id, category)
     },
     deleteCategory: async (_, { id }, { dataSources }, info) => {
-      return await dataSources.categoryAPI.del(id)
+      return await dataSources.ModalAPI.del('Category', id)
     },
     createSite: async(_, { site }, { dataSources }, info) => {
-      return await dataSources.SQLiteAPI.post('site', site)
+      return await dataSources.ModalAPI.post('site', site)
     }
   }
 }
 
-const { createStore } = require('./utils')
-const CategoryAPI = require('./datasources/category')
-const SiteAPI = require('./datasources/site')
-const SQLiteAPI = require('./datasources/sqlite')
-const store = createStore()
+const ModalAPI  = require('./datasources/modal')
 const dataSources = () => ({
-  categoryAPI: new CategoryAPI({ store }),
-  siteAPI: new SiteAPI({ store }),
-  SQLiteAPI: new SQLiteAPI({ store })
+  ModalAPI: new ModalAPI()
 })
 
 const context = async ({ req }) => {

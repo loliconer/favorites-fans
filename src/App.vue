@@ -9,6 +9,8 @@
         <v-button @click="startAdd">添加</v-button>
         <v-button>导入</v-button>
         <v-button @click="startManage">管理</v-button>
+        <v-button @click="mode = 2" v-if="mode === 1">编辑</v-button>
+        <v-button @click="mode = 1" v-if="mode === 2">查看</v-button>
       </div>
 
       <div class="content">
@@ -22,12 +24,33 @@
               ]" v-model="childrenIndex[i]"></v-tab>
             </div>
           </div>
-          <div class="s-body">
+          <div class="s-body-view" v-if="mode === 1">
             <template v-if="childrenIndex[i] === 0">
               <div class="b-item" v-for="item of sites[cat.id]"><a class="link" target="_blank" :href="item.url">{{item.title}}</a></div>
             </template>
             <template v-else>
               <div class="b-item" v-for="item of sites[cat.children[childrenIndex[i] - 1].id]"><a class="link" target="_blank" :href="item.url">{{item.title}}</a></div>
+            </template>
+          </div>
+
+          <div class="s-body-edit" v-if="mode === 2">
+            <template v-if="childrenIndex[i] === 0">
+              <div class="b-item" v-for="item of sites[cat.id]">
+                <a class="link" target="_blank" :href="item.url">{{item.title}}</a>
+                <div class="i-actions">
+                  <v-button size="sm">修改</v-button>
+                  <v-button size="sm" type="danger" @click="deleteSite(item.id)">删除</v-button>
+                </div>
+              </div>
+            </template>
+            <template v-else>
+              <div class="b-item" v-for="item of sites[cat.children[childrenIndex[i] - 1].id]">
+                <a class="link" target="_blank" :href="item.url">{{item.title}}</a>
+                <div class="i-actions">
+                  <v-button size="sm">修改</v-button>
+                  <v-button size="sm" type="danger">删除</v-button>
+                </div>
+              </div>
             </template>
           </div>
         </section>
@@ -109,12 +132,12 @@ query {
   }
 }`,
     createCategory: gql`
-mutation ($name: String!, $parentId: Int) {
-  createCategory(name: $name, parentId: $parentId)
+mutation ($category: CategoryInput) {
+  createCategory(category: $category)
 }`,
     updateCategory: gql`
-mutation ($id: Int!, $name: String!) {
-  updateCategory(id: $id, name: $name)
+mutation ($id: Int!, $category: CategoryInput) {
+  updateCategory(id: $id, category: $category)
 }`,
     createSite: gql`
 mutation ($site: SiteInput) {
@@ -172,7 +195,8 @@ query {
           left: 0
         },
         parentId: undefined,
-        selectedCategory: {}
+        selectedCategory: {},
+        mode: 1
       }
     },
     components: { VTag },
@@ -243,16 +267,21 @@ query {
           const { categories } = this
           body = await apolloClient.mutate({
             mutation: prepared.createCategory,
-            variables: { name: currentCategoryName }
+            variables: {
+              category: {
+                name: currentCategoryName
+              }
+            }
           }).catch(this.error2)
           if (body === undefined) return
 
           this.success('增加成功')
           categories.push({
-            id: body,
+            id: body.data.createCategory,
             name: currentCategoryName,
             children: []
           })
+          this.childrenIndex.push(0)
           return true
         }
 
@@ -261,15 +290,17 @@ query {
           body = await apolloClient.mutate({
             mutation: prepared.createCategory,
             variables: {
-              name: currentCategoryName,
-              parentId: selectedCategory.id
+              category: {
+                name: currentCategoryName,
+                parentId: selectedCategory.id
+              }
             }
           }).catch(this.error2)
           if (body === undefined) return
 
           this.success('增加成功')
           selectedCategory.children.push({
-            id: body,
+            id: body.data.createCategory,
             name: currentCategoryName,
             parentId: selectedCategory.id
           })
@@ -282,7 +313,9 @@ query {
             mutation: prepared.updateCategory,
             variables: {
               id: selectedCategory.id,
-              name: currentCategoryName
+              category: {
+                name: currentCategoryName
+              }
             }
           }).catch(this.error2)
           if (body === undefined) return
@@ -314,7 +347,7 @@ query {
       },
       startDel() {
         this.isShowContext = false
-        const { categories, selectedCategory } = this
+        const { categories, selectedCategory, childrenIndex } = this
         this.$modal({
           content: '删除分类会同时删除其子分类，确定删除？',
           fixed: true,
@@ -332,6 +365,7 @@ query {
               categories.forEach((cat, i) => {
                 cat.id === selectedCategory.id && categories.splice(i, 1)
               })
+              childrenIndex.pop()
             } else {
               categories.forEach(cat => {
                 if (cat.id === selectedCategory.parentId) {

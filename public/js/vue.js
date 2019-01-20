@@ -760,7 +760,7 @@ var prototypeAccessors = { child: { configurable: true } };
 
 // DEPRECATED: alias for componentInstance for backwards compat.
 /* istanbul ignore next */
-prototypeAccessors.child.get = function () {
+ModalAPI.get = function () {
   return this.componentInstance
 };
 

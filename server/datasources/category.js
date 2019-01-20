@@ -11,6 +11,8 @@ class CategoryAPI extends DataSource {
   }
 
   async get() {
+    console.log(222)
+    console.log(this.store.category)
     const body = await this.store.category.select()
     if (body === undefined) return []
 
@@ -27,13 +29,15 @@ class CategoryAPI extends DataSource {
   }
 
   async put(id, name) {
+    console.log(333)
+    console.log(this.store.category)
     const body = await this.store.category.where(`id=${id}`).update({ name })
     if (body === undefined) return -1
     return body
   }
 
   async del(id) {
-    const body = await this.store.category.where(`id=${id} OR parentId=${id}`).del()
+    const body = await ModalAPI.del()
     if (body === undefined) return -1
     return body
   }

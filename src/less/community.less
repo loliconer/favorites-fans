@@ -119,12 +119,31 @@
       }
     }
 
-    .s-body {
+    .s-body-view {
       display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      grid-template-rows: 40px;
+
       .b-item {
         display: flex;
-        flex-wrap: wrap;
         align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .s-body-edit {
+      .b-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 40px;
+        padding: 0 var(--unit);
+
+        .i-actions {
+          .v-btn {
+            margin: 0 var(--unit);
+          }
+        }
       }
     }
   }

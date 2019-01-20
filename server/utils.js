@@ -1,6 +1,3 @@
-const Category = require('./models/Category')
-const Site = require('./models/Site')
-
 module.exports.paginateResults = ({
                                     after: cursor,
                                     pageSize = 20,
@@ -27,11 +24,4 @@ module.exports.paginateResults = ({
         Math.min(results.length, cursorIndex + 1 + pageSize)
       )
     : results.slice(0, pageSize)
-}
-
-module.exports.createStore = () => {
-  return {
-    category: new Category(),
-    site: new Site()
-  }
 }
