@@ -44,6 +44,8 @@ const schema = gql`
     updateCategory(id: Int!, category: CategoryInput): Int
     deleteCategory(id: Int!): Int
     createSite(site: SiteInput): Int
+    updateSite(id: Int!, site: SiteInput): Int
+    deleteSite(id: Int!): Int
   }
 `
 
@@ -67,7 +69,13 @@ const resolvers = {
       return await dataSources.ModalAPI.del('Category', id)
     },
     createSite: async(_, { site }, { dataSources }, info) => {
-      return await dataSources.ModalAPI.post('site', site)
+      return await dataSources.ModalAPI.post('Site', site)
+    },
+    updateSite: async(_, { id, site }, { dataSources }, info) => {
+      return await dataSources.ModalAPI.put('Site', id, site)
+    },
+    deleteSite: async(_, { id }, { dataSources }, info) => {
+      return await dataSources.ModalAPI.del('Site', id)
     }
   }
 }

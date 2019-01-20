@@ -6,7 +6,7 @@
       </div>
 
       <div class="actions">
-        <v-button @click="startAdd">添加</v-button>
+        <v-button @click="startAddSite">添加</v-button>
         <v-button>导入</v-button>
         <v-button @click="startManage">管理</v-button>
         <v-button @click="mode = 2" v-if="mode === 1">编辑</v-button>
@@ -38,8 +38,8 @@
               <div class="b-item" v-for="item of sites[cat.id]">
                 <a class="link" target="_blank" :href="item.url">{{item.title}}</a>
                 <div class="i-actions">
-                  <v-button size="sm">修改</v-button>
-                  <v-button size="sm" type="danger" @click="deleteSite(item.id)">删除</v-button>
+                  <v-button size="sm" @click="startEditSite(item)">修改</v-button>
+                  <v-button size="sm" type="danger" @click="deleteSite(item.id, item.categoryId)">删除</v-button>
                 </div>
               </div>
             </template>
@@ -47,8 +47,8 @@
               <div class="b-item" v-for="item of sites[cat.children[childrenIndex[i] - 1].id]">
                 <a class="link" target="_blank" :href="item.url">{{item.title}}</a>
                 <div class="i-actions">
-                  <v-button size="sm">修改</v-button>
-                  <v-button size="sm" type="danger">删除</v-button>
+                  <v-button size="sm" @click="startEditSite(item)">修改</v-button>
+                  <v-button size="sm" type="danger" @click="deleteSite(item.id, item.categoryId)">删除</v-button>
                 </div>
               </div>
             </template>
@@ -57,7 +57,7 @@
       </div>
     </div>
 
-    <v-popup title="添加网址" v-model="isShowAddSite" :confirm="addSite">
+    <v-popup :title="site.id ? '修改网址' : '添加网址'" v-model="isShowAddEditSite" :confirm="addEditSite">
       <div class="layout-form" slot="content">
         <div class="v-row">
           <label class="label">分类：</label>
@@ -143,6 +143,10 @@ mutation ($id: Int!, $category: CategoryInput) {
 mutation ($site: SiteInput) {
   createSite(site: $site)
 }`,
+    updateSite: gql`
+mutation ($id: Int!, $site: SiteInput) {
+  updateSite(id: $id, site: $site)
+}`,
     getSites: gql`
 query {
   sites {
@@ -178,7 +182,7 @@ query {
         ],
         tabs: [{ name: '分类' }, { name: '标签' }],
         childrenIndex: [],
-        isShowAddSite: false,
+        isShowAddEditSite: false,
         isShowManager: false,
         isShowContext: false,
         isShowManagerCategory: false,
@@ -223,27 +227,77 @@ query {
         })
         this.sites = sites
       },
-      startAdd() {
+      startAddSite() {
         this.site = { tags: [] }
-        this.isShowAddSite = true
+        this.isShowAddEditSite = true
       },
-      async addSite() {
+      startEditSite(site) {
+        this.site = Object.assign({}, site)
+        this.isShowAddEditSite = true
+      },
+      async addEditSite() {
         const { site } = this
         delete site.tags
 
-        const body = await apolloClient.mutate({
-          mutation: prepared.createSite,
-          variables: { site }
-        }).catch(this.error2)
-        if (body === undefined) return
+        if (site.id) {
+          const body = await apolloClient.mutate({
+            mutation: prepared.updateSite,
+            variables: {
+              id: site.id,
+              site: {
+                title: site.title,
+                url: site.url,
+                categoryId: site.categoryId
+              }
+            }
+          }).catch(this.error2)
+          if (body === undefined) return
 
-        this.success('添加成功')
-        if (!this.sites[site.categoryId]) this.sites[site.categoryId] = []
-        this.sites[site.categoryId].push({
-          id: body,
-          ...site
+          this.success('修改成功')
+          this.sites[site.categoryId].forEach((site_, i) => {
+            if (site_.id === site.id) {
+              this.sites[site.categoryId].splice(i, 1, Object.assign({}, site))
+            }
+          })
+          return true
+        } else {
+          const body = await apolloClient.mutate({
+            mutation: prepared.createSite,
+            variables: { site }
+          }).catch(this.error2)
+          if (body === undefined) return
+
+          this.success('添加成功')
+          if (!this.sites[site.categoryId]) this.sites[site.categoryId] = []
+          this.sites[site.categoryId].push({
+            id: body.data.createSite,
+            ...site
+          })
+          return true
+        }
+      },
+      deleteSite(id, categoryId) {
+        const { sites } = this
+        this.$modal({
+          content: '确认删除该网址？',
+          fixed: true,
+          async confirm() {
+            const body = await apolloClient.mutate({
+              mutation: gql`mutation {
+                deleteSite(id: ${id})
+              }`
+            }).catch(this.error2)
+            if (body === undefined) return
+
+            this.success('删除成功')
+            sites[categoryId].forEach((site, i) => {
+              if (site.id === id) {
+                sites[categoryId].splice(i, 1)
+              }
+            })
+            return true
+          }
         })
-        return true
       },
       startManage() {
         this.isShowManager = true
@@ -351,13 +405,12 @@ query {
         this.$modal({
           content: '删除分类会同时删除其子分类，确定删除？',
           fixed: true,
-          async: true,
           async confirm() {
             const body = await apolloClient.mutate({
               mutation: gql`mutation {
                 deleteCategory(id: ${selectedCategory.id})
               }`
-            }).catch(this.error)
+            }).catch(this.error2)
             if (body === undefined) return
 
             this.success('删除成功')
