@@ -120,14 +120,17 @@
     }
 
     .s-body-view {
-      display: grid;
-      grid-template-columns: repeat(5, 1fr);
-      grid-template-rows: 40px;
+      display: flex;
+      flex-wrap: wrap;
 
       .b-item {
         display: flex;
         align-items: center;
         justify-content: center;
+        height: 40px;
+        padding: 0 var(--2unit);
+        border-bottom: 1px solid var(--border-color);
+        border-right: 1px solid var(--border-color);
       }
     }
 

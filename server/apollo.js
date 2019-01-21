@@ -1,10 +1,19 @@
-const { ApolloServer, gql } = require('apollo-server')
+const {
+  ApolloServer, gql,
+  AuthenticationError, ApolloError, UserInputError, ForbiddenError
+} = require('apollo-server')
 
 const schema = gql`
-  type MutationResponse {
+  interface MutationResponse {
     code: String!
     success: Boolean!
     message: String!
+  }
+  type CommonMutationResponse implements MutationResponse {
+    code: String!
+    success: Boolean!
+    message: String!
+    data: Int
   }
   type Category {
     id: Int!
@@ -48,7 +57,6 @@ const schema = gql`
     deleteSite(id: Int!): Int
   }
 `
-
 const resolvers = {
   Query: {
     categories: async (_, { pageSize = 20, after }, { dataSources }, info) => {

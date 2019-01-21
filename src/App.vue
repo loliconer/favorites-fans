@@ -123,43 +123,6 @@
   import 'lovue/src/less/extension/Tag.less'
   import {makeTreeData} from './js/lib/tools'
 
-  const prepared = {
-    getCategories: gql`
-query {
-  categories {
-    id
-    name
-    parentId
-  }
-}`,
-    createCategory: gql`
-mutation ($category: CategoryInput) {
-  createCategory(category: $category)
-}`,
-    updateCategory: gql`
-mutation ($id: Int!, $category: CategoryInput) {
-  updateCategory(id: $id, category: $category)
-}`,
-    createSite: gql`
-mutation ($site: SiteInput) {
-  createSite(site: $site)
-}`,
-    updateSite: gql`
-mutation ($id: Int!, $site: SiteInput) {
-  updateSite(id: $id, site: $site)
-}`,
-    getSites: gql`
-query {
-  sites {
-    id
-    title
-    description
-    url
-    categoryId
-  }
-}`
-  }
-
   export default {
     name: 'app',
     data() {
@@ -208,20 +171,27 @@ query {
       [Tag.name]: Tag
     },
     methods: {
-      async getCategories() {
+      async getCategoriesAndSites() {
         const body = await apolloClient.query({
-          query: prepared.getCategories
+          query: gql`query {
+            categories {
+              id
+              name
+              parentId
+            }
+            sites {
+              id
+              title
+              description
+              url
+              categoryId
+            }
+          }`
         }).catch(this.error2)
         if (body === undefined) return
 
         this.categories = makeTreeData(body.data.categories)
         this.childrenIndex = this.categories.map(() => 0)
-      },
-      async getSites() {
-        const body = await apolloClient.query({
-          query: prepared.getSites
-        }).catch(this.error2)
-        if (body === undefined) return
 
         const sites = {}
         body.data.sites.forEach(site => {
@@ -244,7 +214,9 @@ query {
 
         if (site.id) {
           const body = await apolloClient.mutate({
-            mutation: prepared.updateSite,
+            mutation: gql`mutation ($id: Int!, $site: SiteInput) {
+              updateSite(id: $id, site: $site)
+            }`,
             variables: {
               id: site.id,
               site: {
@@ -265,7 +237,9 @@ query {
           return true
         } else {
           const body = await apolloClient.mutate({
-            mutation: prepared.createSite,
+            mutation: gql`mutation ($site: SiteInput) {
+              createSite(site: $site)
+            }`,
             variables: { site }
           }).catch(this.error2)
           if (body === undefined) return
@@ -323,7 +297,9 @@ query {
         if (manageCategoryType === 'create') {
           const { categories } = this
           body = await apolloClient.mutate({
-            mutation: prepared.createCategory,
+            mutation: gql`mutation ($category: CategoryInput) {
+              createCategory(category: $category)
+            }`,
             variables: {
               category: {
                 name: currentCategoryName
@@ -345,7 +321,9 @@ query {
         if (manageCategoryType === 'createChild') {
           const { selectedCategory } = this
           body = await apolloClient.mutate({
-            mutation: prepared.createCategory,
+            mutation: gql`mutation ($category: CategoryInput) {
+              createCategory(category: $category)
+            }`,
             variables: {
               category: {
                 name: currentCategoryName,
@@ -367,7 +345,9 @@ query {
         if (manageCategoryType === 'rename') {
           const { selectedCategory } = this
           body = await apolloClient.mutate({
-            mutation: prepared.updateCategory,
+            mutation: gql`mutation ($id: Int!, $category: CategoryInput) {
+              updateCategory(id: $id, category: $category)
+            }`,
             variables: {
               id: selectedCategory.id,
               category: {
@@ -437,8 +417,7 @@ query {
       }
     },
     created() {
-      this.getCategories()
-      this.getSites()
+      this.getCategoriesAndSites()
     },
     mounted() {
       window.addEventListener('click', () => {
