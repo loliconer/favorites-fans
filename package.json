@@ -27,7 +27,7 @@
     "graphql-tag": "^2.10.0",
     "less": "^3.8.1",
     "less-loader": "^4.1.0",
-    "lovue": "^2.4.1",
+    "lovue": "^2.5.3",
     "vue-template-compiler": "^2.5.17"
   }
 }

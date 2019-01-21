@@ -119,7 +119,8 @@
 </template>
 
 <script>
-  import VTag from 'lovue/src/extension/Tag'
+  import Tag from 'lovue/src/extension/Tag'
+  import 'lovue/src/less/extension/Tag.less'
   import {makeTreeData} from './js/lib/tools'
 
   const prepared = {
@@ -203,7 +204,9 @@ query {
         mode: 1
       }
     },
-    components: { VTag },
+    components: {
+      [Tag.name]: Tag
+    },
     methods: {
       async getCategories() {
         const body = await apolloClient.query({
