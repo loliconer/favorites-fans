@@ -112,7 +112,7 @@
 
     <v-popup :title="managerCategoryTitle" v-model="isShowManagerCategory" :confirm="manageCategory" fixed>
       <template slot="content">
-        <v-input v-model="currentCategoryName"></v-input>
+        <v-input v-model="currentCategoryName" focus></v-input>
       </template>
     </v-popup>
   </div>
@@ -127,15 +127,6 @@
     name: 'app',
     data() {
       return {
-        topCategories: [
-          { name: '常用网址', value: 1 },
-          { name: '实用查询', value: 2 },
-          { name: '选择其他分类', value: 3 }
-        ], /*
-         categories: [
-         { id: 1, name: '常用网址', value: 1 },
-         { id: 2, name: '实用查询', value: 2 }
-         ],*/
         categories: [],
         tags: [
           { name: '数字货币' },
@@ -228,6 +219,11 @@
           }).catch(this.error2)
           if (body === undefined) return
 
+          if (body.data.updateSite === 0) {
+            this.warn('修改的网址不存在')
+            return true
+          }
+
           this.success('修改成功')
           this.sites[site.categoryId].forEach((site_, i) => {
             if (site_.id === site.id) {
@@ -260,17 +256,21 @@
           fixed: true,
           async confirm() {
             const body = await apolloClient.mutate({
-              mutation: gql`mutation {
-                deleteSite(id: ${id})
-              }`
+              mutation: gql`mutation ($id: Int!) {
+                deleteSite(id: $id)
+              }`,
+              variables: { id }
             }).catch(this.error2)
             if (body === undefined) return
 
+            if (body.data.deleteSite === 0) {
+              this.error('删除的网址不存在')
+              return true
+            }
+
             this.success('删除成功')
             sites[categoryId].forEach((site, i) => {
-              if (site.id === id) {
-                sites[categoryId].splice(i, 1)
-              }
+              site.id === id && sites[categoryId].splice(i, 1)
             })
             return true
           }
@@ -294,11 +294,17 @@
         const { manageCategoryType, currentCategoryName } = this
         let body
 
+        if (currentCategoryName === '') return this.error('名称不能为空')
+
         if (manageCategoryType === 'create') {
           const { categories } = this
           body = await apolloClient.mutate({
             mutation: gql`mutation ($category: CategoryInput) {
-              createCategory(category: $category)
+              createCategory(category: $category) {
+                code
+                success
+                data
+              }
             }`,
             variables: {
               category: {
@@ -308,21 +314,28 @@
           }).catch(this.error2)
           if (body === undefined) return
 
-          this.success('增加成功')
-          categories.push({
-            id: body.data.createCategory,
-            name: currentCategoryName,
-            children: []
-          })
-          this.childrenIndex.push(0)
-          return true
+          body = body.data.createCategory
+          if (body.success) {
+            this.success('增加成功')
+            categories.push({
+             id: body.data,
+             name: currentCategoryName,
+             children: []
+             })
+            this.childrenIndex.push(0)
+            return true
+          }
         }
 
         if (manageCategoryType === 'createChild') {
           const { selectedCategory } = this
           body = await apolloClient.mutate({
             mutation: gql`mutation ($category: CategoryInput) {
-              createCategory(category: $category)
+              createCategory(category: $category) {
+                code
+                success
+                data
+              }
             }`,
             variables: {
               category: {
@@ -357,6 +370,11 @@
           }).catch(this.error2)
           if (body === undefined) return
 
+          if (body.data.updateCategory === 0) {
+            this.error('修改的分类不存在')
+            return true
+          }
+
           this.success('修改成功')
           selectedCategory.name = currentCategoryName
           return true
@@ -390,11 +408,19 @@
           fixed: true,
           async confirm() {
             const body = await apolloClient.mutate({
-              mutation: gql`mutation {
-                deleteCategory(id: ${selectedCategory.id})
-              }`
+              mutation: gql`mutation ($id: Int!) {
+                deleteCategory(id: $id)
+              }`,
+              variables: {
+                id: selectedCategory.id
+              }
             }).catch(this.error2)
             if (body === undefined) return
+
+            if (body.data.deleteCategory === 0) {
+              this.error('删除的分类不存在')
+              return true
+            }
 
             this.success('删除成功')
             if (!selectedCategory.parentId) {
@@ -402,15 +428,15 @@
                 cat.id === selectedCategory.id && categories.splice(i, 1)
               })
               childrenIndex.pop()
-            } else {
-              categories.forEach(cat => {
-                if (cat.id === selectedCategory.parentId) {
-                  cat.children.forEach((child, j) => {
-                    child.id === selectedCategory.id && cat.children.splice(j, 1)
-                  })
-                }
-              })
+              return true
             }
+
+            categories.forEach(cat => {
+              if (cat.id !== selectedCategory.parentId) return
+              cat.children.forEach((child, j) => {
+                child.id === selectedCategory.id && cat.children.splice(j, 1)
+              })
+            })
             return true
           }
         })
