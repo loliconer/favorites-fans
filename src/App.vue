@@ -2,7 +2,7 @@
   <div id="app">
     <div class="container">
       <div class="search-wrap">
-        <v-search></v-search>
+        <v-search @search="search"></v-search>
       </div>
 
       <div class="actions">
@@ -54,6 +54,10 @@
             </template>
           </div>
         </section>
+        <div class="search-result" v-if="searched.length">
+          <v-icon icon="close" @click.native="closeSearched"></v-icon>
+          <div class="r-site" v-for="site of searched"><a class="link" target="_blank" :href="site.url">{{site.title}}</a></div>
+        </div>
       </div>
     </div>
 
@@ -155,7 +159,8 @@
         },
         parentId: undefined,
         selectedCategory: {},
-        mode: 1
+        mode: 1,
+        searched: []
       }
     },
     components: {
@@ -440,6 +445,25 @@
             return true
           }
         })
+      },
+      search(keywords) {
+        if (keywords === '') return
+
+        const { sites } = this
+        const result = []
+
+        for (let key in sites) {
+          sites[key].forEach(site => {
+            if (site.title.includes(keywords)) {
+              result.push(site)
+            }
+          })
+        }
+
+        this.searched = result
+      },
+      closeSearched() {
+        this.searched = []
       }
     },
     created() {
