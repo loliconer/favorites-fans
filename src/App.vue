@@ -47,7 +47,7 @@
       </div>
     </div>
 
-    <v-popup :title="site.id ? '修改网址' : '添加网址'" v-model="isShowAddEditSite" :confirm="addEditSite">
+    <v-popup class="popup-site" :title="site.id ? '修改网址' : '添加网址'" v-model="isShowAddEditSite" :confirm="addEditSite">
       <div class="layout-form" slot="content">
         <div class="v-row">
           <label class="label">分类：</label>
@@ -71,7 +71,7 @@
       </div>
     </v-popup>
 
-    <v-popup title="管理分类与标签" v-model="isShowManager" fixed>
+    <v-popup class="popup-manager" title="管理分类与标签" v-model="isShowManager" fixed>
       <template slot="content">
         <v-tab :titles="tabs" v-model="managerTab"></v-tab>
         <div class="mgr-panel">
@@ -127,7 +127,6 @@
           { name: '插件' }
         ],
         tabs: [{ name: '分类' }, { name: '标签' }],
-        childrenIndex: [],
         isShowAddEditSite: false,
         isShowManager: false,
         isShowContext: false,
@@ -174,7 +173,6 @@
         if (body === undefined) return
 
         this.categories = makeTreeData(body.data.categories)
-        this.childrenIndex = this.categories.map(() => 0)
 
         const sites = {}
         body.data.sites.forEach(site => {
@@ -313,11 +311,11 @@
           if (body.success) {
             this.success('增加成功')
             categories.push({
-             id: body.data,
-             name: currentCategoryName,
-             children: []
-             })
-            this.childrenIndex.push(0)
+              id: body.data,
+              name: currentCategoryName,
+              value: body.data,
+              children: []
+            })
             return true
           }
         }
@@ -341,13 +339,17 @@
           }).catch(this.error2)
           if (body === undefined) return
 
-          this.success('增加成功')
-          selectedCategory.children.push({
-            id: body.data.createCategory,
-            name: currentCategoryName,
-            parentId: selectedCategory.id
-          })
-          return true
+          body = body.data.createCategory
+          if (body.success) {
+            this.success('增加成功')
+            selectedCategory.children.push({
+              id: body.data,
+              name: currentCategoryName,
+              value: body.data,
+              parentId: selectedCategory.id
+            })
+            return true
+          }
         }
 
         if (manageCategoryType === 'rename') {
@@ -398,7 +400,7 @@
       startDel() {
         if (sessionStorage.starter !== this.starter) return this.warn('无权限')
         this.isShowContext = false
-        const { categories, selectedCategory, childrenIndex } = this
+        const { categories, selectedCategory } = this
         this.$modal({
           content: '删除分类会同时删除其子分类，确定删除？',
           fixed: true,
@@ -423,7 +425,6 @@
               categories.forEach((cat, i) => {
                 cat.id === selectedCategory.id && categories.splice(i, 1)
               })
-              childrenIndex.pop()
               return true
             }
 
