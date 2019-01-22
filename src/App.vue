@@ -131,6 +131,7 @@
     name: 'app',
     data() {
       return {
+        starter: 'vue',
         categories: [],
         tags: [
           { name: '数字货币' },
@@ -205,6 +206,7 @@
         this.isShowAddEditSite = true
       },
       async addEditSite() {
+        if (sessionStorage.starter !== this.starter) return this.warn('无权限')
         const { site } = this
         delete site.tags
 
@@ -255,6 +257,7 @@
         }
       },
       deleteSite(id, categoryId) {
+        if (sessionStorage.starter !== this.starter) return this.warn('无权限')
         const { sites } = this
         this.$modal({
           content: '确认删除该网址？',
@@ -296,6 +299,7 @@
         this.isShowContext = true
       },
       async manageCategory() {
+        if (sessionStorage.starter !== this.starter) return this.warn('无权限')
         const { manageCategoryType, currentCategoryName } = this
         let body
 
@@ -406,6 +410,7 @@
         this.isShowManagerCategory = true
       },
       startDel() {
+        if (sessionStorage.starter !== this.starter) return this.warn('无权限')
         this.isShowContext = false
         const { categories, selectedCategory, childrenIndex } = this
         this.$modal({
