@@ -14,44 +14,30 @@
       </div>
 
       <div class="content">
-        <section class="section" v-for="(cat, i) of categories">
-          <div class="s-head">
-            <div class="h-title" @click="childrenIndex[i] = -1">{{cat.name}}</div>
-            <div class="h-nav">
-              <v-tab :titles="[
-              { name: '未分类' },
-              ...cat.children
-              ]" v-model="childrenIndex[i]"></v-tab>
+        <section class="section" v-for="cat of categories">
+          <div class="s-row">
+            <div class="r-category">{{cat.name}}</div>
+            <div class="r-sites">
+              <div class="site-item" v-for="site of sites[cat.id]">
+                <a class="link" target="_blank" :href="site.url">{{site.title}}</a>
+                <div class="i-actions" v-if="mode === 2">
+                  <v-button size="sm" @click="startEditSite(site)">修改</v-button>
+                  <v-button size="sm" type="danger" @click="deleteSite(site.id, site.categoryId)">删除</v-button>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="s-body-view" v-if="mode === 1">
-            <template v-if="childrenIndex[i] === 0">
-              <div class="b-item" v-for="item of sites[cat.id]"><a class="link" target="_blank" :href="item.url">{{item.title}}</a></div>
-            </template>
-            <template v-else>
-              <div class="b-item" v-for="item of sites[cat.children[childrenIndex[i] - 1].id]"><a class="link" target="_blank" :href="item.url">{{item.title}}</a></div>
-            </template>
-          </div>
-
-          <div class="s-body-edit" v-if="mode === 2">
-            <template v-if="childrenIndex[i] === 0">
-              <div class="b-item" v-for="item of sites[cat.id]">
-                <a class="link" target="_blank" :href="item.url">{{item.title}}</a>
-                <div class="i-actions">
-                  <v-button size="sm" @click="startEditSite(item)">修改</v-button>
-                  <v-button size="sm" type="danger" @click="deleteSite(item.id, item.categoryId)">删除</v-button>
+          <div class="s-row" v-for="row of cat.children">
+            <div class="r-category">{{row.name}}</div>
+            <div class="r-sites">
+              <div class="site-item" v-for="site of sites[row.id]">
+                <a class="link" target="_blank" :href="site.url">{{site.title}}</a>
+                <div class="i-actions" v-if="mode === 2">
+                  <v-button size="sm" @click="startEditSite(site)">修改</v-button>
+                  <v-button size="sm" type="danger" @click="deleteSite(site.id, site.categoryId)">删除</v-button>
                 </div>
               </div>
-            </template>
-            <template v-else>
-              <div class="b-item" v-for="item of sites[cat.children[childrenIndex[i] - 1].id]">
-                <a class="link" target="_blank" :href="item.url">{{item.title}}</a>
-                <div class="i-actions">
-                  <v-button size="sm" @click="startEditSite(item)">修改</v-button>
-                  <v-button size="sm" type="danger" @click="deleteSite(item.id, item.categoryId)">删除</v-button>
-                </div>
-              </div>
-            </template>
+            </div>
           </div>
         </section>
         <div class="search-result" v-if="searched.length">
@@ -459,7 +445,7 @@
 
         for (let key in sites) {
           sites[key].forEach(site => {
-            if (site.title.includes(keywords)) {
+            if (site.title.toLowerCase().includes(keywords.toLowerCase())) {
               result.push(site)
             }
           })

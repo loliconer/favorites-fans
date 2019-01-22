@@ -89,66 +89,62 @@
     margin-bottom: var(--3unit);
     background-color: var(--white);
 
-    .s-head {
-      position: relative;
+    .s-row {
       display: flex;
-      align-items: center;
 
-      .h-title {
-        background-color: var(--blue-color);
-        width: 100px;
-        line-height: 40px;
-        text-align: center;
-        color: var(--white);
-      }
-
-      .h-nav {
-        flex: 1;
+      .r-category {
         display: flex;
         align-items: center;
-        height: 40px;
-        text-align: center;
+        justify-content: center;
+        min-width: 200px;
+        background-color: #e5f9fc;
+      }
+
+      .r-sites {
+        flex: 1;
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-start;
+        padding: var(--2unit);
         border-bottom: 1px solid var(--border-color);
 
-        .v-tab {
-          .tabs {
-            .tab {
-              height: 39px;
-              line-height: 38px;
+        .site-item {
+          display: flex;
+          align-items: center;
+          height: 40px;
+          padding: 0 var(--2unit);
+          border: 1px solid var(--border-color);
+          margin-top: -1px;
+          margin-left: -1px;
+
+          .link {
+            transition: color .2s;
+
+            &:hover {
+              color: var(--hover-blue);
+            }
+          }
+
+          .i-actions {
+            margin-left: var(--unit);
+
+            .v-btn {
+              margin: 0 4px;
             }
           }
         }
       }
-    }
 
-    .s-body-view {
-      display: flex;
-      flex-wrap: wrap;
-
-      .b-item {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        height: 40px;
-        padding: 0 var(--2unit);
-        border: 1px solid var(--border-color);
-        margin-top: -1px;
-        margin-left: -1px;
+      &:first-child {
+        .r-category {
+          color: var(--white);
+          background-color: var(--blue-color);
+        }
       }
-    }
 
-    .s-body-edit {
-      .b-item {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        height: 40px;
-        padding: 0 var(--unit);
-
-        .i-actions {
-          .v-btn {
-            margin: 0 var(--unit);
-          }
+      &:last-child {
+        .r-sites {
+          border-bottom: none;
         }
       }
     }
