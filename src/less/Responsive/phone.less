@@ -5,3 +5,36 @@
   width: 100vw;
   padding: var(--unit);
 }
+
+.content {
+  .section {
+    .s-row {
+      flex-direction: column;
+
+      .r-category {
+        height: 40px;
+      }
+
+      .r-sites {
+        .site-item {
+          flex-grow: 1;
+          height: auto;
+          min-height: 40px;
+          line-height: 1.5;
+          justify-content: center;
+          font-size: var(--small-font);
+        }
+      }
+    }
+  }
+
+  .search-result {
+    .r-site {
+      flex-grow: 1;
+      font-size: var(--small-font);
+      height: auto;
+      min-height: 40px;
+      line-height: 1.5;
+    }
+  }
+}

@@ -1,5 +1,6 @@
 module.exports = {
   lintOnSave: false,
+  baseUrl: '',
   pages: {
     index: 'src/main.js'
   },
@@ -27,8 +28,8 @@ module.exports = {
   },
   devServer: {
     proxy: {
-      '/api': {
-        target: 'http://localhost:8021',
+      '/graphql-favorites-fans': {
+        target: 'http://localhost:4000',
         changeOrigin: true
       }
     }

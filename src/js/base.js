@@ -14,7 +14,7 @@ window.utils = utils
 window.$fetch = utils.fetch
 window.gql = gql
 window.apolloClient = new ApolloClient({
-  uri: 'http://localhost:4000/graphql'
+  uri: '/graphql-favorites-fans'
 })
 
 Vue.config.productionTip = false
