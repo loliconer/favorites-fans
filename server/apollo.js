@@ -18,7 +18,7 @@ const aplServer = new ApolloServer({
   resolvers,
   dataSources,
   context,
-  endpointUrl: 'graphql-favorites-fans'
+  endpointUrl: 'graphql-luo-wang'
 })
 
 aplServer.listen({ port: 4000 }).then(({ url }) => {

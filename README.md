@@ -1,5 +1,5 @@
-# favorites-fans
-Collect, clear up, search and sync your favorites everywhere.
+# LuoWang
+罗网：网罗天下优质网址！
 
 # Tech Stack
 Vue + GraphQL + Apollo + Node.js + SQLite3

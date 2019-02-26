@@ -28,7 +28,7 @@ module.exports = {
   },
   devServer: {
     proxy: {
-      '/graphql-favorites-fans': {
+      '/graphql-luo-wang': {
         target: 'http://localhost:4000',
         changeOrigin: true
       }
