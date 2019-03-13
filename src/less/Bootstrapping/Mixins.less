@@ -1,5 +1,3 @@
-@import "Variables";
-
 .hvcenter {
   display: flex;
   align-items: center;
@@ -59,7 +57,7 @@
   }
 }
 
-.non-select() {
+.mixin-non-select {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -69,28 +67,28 @@
 .mixin-table(@line-height: 40px; @bordered: false; @striped: false) {
   width: 100%;
   text-align: left;
-  font-size: @small-font;
-  border: 1px solid @border-color;
+  font-size: var(--small-font);
+  border: 1px solid var(--border-color);
 
   caption {
     margin-bottom: 10px;
-    font-size: @normal-font;
+    font-size: var(--normal-font);
   }
 
   thead {
-    border-bottom: 1px solid @border-color;
-    background-color: #F5F6FA;
+    border-bottom: 1px solid var(--border-color);
+    background-color: #f5f6fa;
 
     tr {
       height: @line-height;
       th {
         padding: 0 15px;
         font-weight: normal;
-        color: @assist-font-color;
+        color: var(--second-color);
         white-space: nowrap;
 
         & when (@bordered = true) {
-          border-right: 1px solid @border-color;
+          border-right: 1px solid var(--border-color);
 
           &:last-child {
             border-right: none;
@@ -102,21 +100,21 @@
   tbody {
     & when (@striped = true) {
       tr:nth-child(odd) {
-        background-color: @bg-color;
+        background-color: var(--bg-color);
       }
     }
 
     tr {
       height: @line-height;
       transition: background-color .25s ease;
-      border-bottom: 1px solid @border-color;
+      border-bottom: 1px solid var(--border-color);
 
       &:last-child {
         border-bottom: none;
       }
 
       &:hover {
-        background-color: @bg-color;
+        background-color: var(--bg-color);
       }
 
       &.row-loading {
@@ -128,7 +126,7 @@
         white-space: nowrap;
 
         & when (@bordered = true) {
-          border-right: 1px solid @border-color;
+          border-right: 1px solid var(--border-color);
 
           &:last-child {
             border-right: none;
@@ -137,87 +135,51 @@
 
         &.no-data-info {
           text-align: center;
-          color: @assist-font-color;
+          color: var(--second-color);
         }
       }
     }
 
     .btn-text {
-      color: @blue-color;
+      color: var(--blue-color);
 
       &:hover {
-        color: @hover-blue-color;
+        color: var(--hover-blue);
       }
     }
   }
 }
 
 .mixin-transition(@property, @time: .2s, @function: ease-out) {
-  will-change: @property;
   transition: @property @time @function;
 }
 
-.mixin-hidden() {
-  //visibility: hidden;
-  //transform: rotateY(90deg);
-  //will-change: transform;
-  //transition: transform .4s ease-out;
-  display: none;
-}
-
-.mixin-visible() {
-  //visibility: visible;
-  //transform: rotateY(0deg);
-  display: block;
-}
-
-.mixin-base-button() {
-  display: inline-block;
-  font-size: @small-font;
-  text-align: center;
-  padding: 0 12px;
-  height: 30px;
-  line-height: 28px;
-  min-width: 72px;
-  background-color: transparent;
+.mixin-button {
+  .mixin-non-select;
+  touch-action: manipulation;
   border: 1px solid transparent;
-  border-radius: @border-radius-small;
+  white-space: nowrap;
+  padding: 0 var(--2unit);
+  font-size: var(--small-font);
+  border-radius: var(--border-radius);
+  height: var(--4unit);
+  transition: all .3s cubic-bezier(.645, .045, .355, 1);
   cursor: pointer;
-  transition: all .3s;
 }
 
-.mixin-button-solid() {
-  background-color: @blue-color;
-  color: @white-color;
+.mixin-button-ghost {
+  border-color: var(--border-color);
+  background-color: var(--white);
 
   &:hover {
-    background-color: @hover-blue-color;
+    color: var(--hover-blue);
+    border-color: var(--hover-blue);
   }
 
   &:active {
-    background-color: @active-blue-color;
+    color: var(--active-blue);
+    border-color: var(--active-blue);
   }
-}
-
-.mixin-button-ghost() {
-  border-color: @blue-color;
-  line-height: 28px;
-  color: @blue-color;
-
-  &:hover {
-    border-color: @hover-blue-color;
-    color: @hover-blue-color;
-  }
-  &:active {
-    border-color: @active-blue-color;
-    color: @active-blue-color;
-  }
-}
-
-.mixin-content-width() {
-  width: 60vw;
-  min-width: @min-width;
-  margin: 0 auto;
 }
 
 .flex {
@@ -244,24 +206,22 @@
   justify-content: space-around;
 }
 
-.mixin-submit-loading-center() {
-  position: relative;
-
-  .vue-loading {
-    position: absolute;
-    top: 3px;
-    left: 50%;
-    transform: translateX(50px);
-  }
+.mixin-border {
+  border: 1px solid var(--border-color);
 }
 
-.mixin-bg-body {
-  background-color: @bg-color;
-  min-height: 100vh;
-  margin-bottom: 0;
+.mixin-border-left {
+  border-left: 1px solid var(--border-color);
 }
 
-.mixin-md-pre-font {
-  font-family: Roboto Mono, Lucida Sans Typewriter, Lucida Console, monaco, Courrier, monospace;
-  font-size: .85em;
+.mixin-border-right {
+  border-right: 1px solid var(--border-color);
+}
+
+.mixin-border-top {
+  border-top: 1px solid var(--border-color);
+}
+
+.mixin-border-bottom {
+  border-bottom: 1px solid var(--border-color);
 }

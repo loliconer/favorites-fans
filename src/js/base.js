@@ -1,20 +1,21 @@
 import Vue from 'vue'
-import 'lovue'
+import lovue from 'lovue'
 import 'lovue/dist/lovue.min.css'
 import 'lovue/dist/lovue.extension.min.css'
 import '../less/community.less'
 import '../less/layout.less'
 import './lib/iconfont'
-import utils from 'lovue/dist/utils.esm'
+import {$fetch} from 'lovue/dist/utils.esm'
 import ApolloClient from 'apollo-boost'
 import gql from 'graphql-tag'
 import errorMessages from './lib/errorMessages'
 
-window.utils = utils
-window.$fetch = utils.fetch
+Vue.use(lovue)
+
+window.$fetch = $fetch
 window.gql = gql
 window.apolloClient = new ApolloClient({
-  uri: '/graphql-favorites-fans'
+  uri: '/graphql-luo-wang'
 })
 
 Vue.config.productionTip = false

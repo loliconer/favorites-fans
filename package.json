@@ -27,7 +27,36 @@
     "graphql-tag": "^2.10.0",
     "less": "^3.8.1",
     "less-loader": "^4.1.0",
-    "lovue": "^2.5.3",
+    "lovue": "^2.6.1",
     "vue-template-compiler": "^2.5.17"
-  }
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "es6": true,
+      "node": true
+    },
+    "extends": [
+      "plugin:vue/essential",
+      "eslint:recommended"
+    ],
+    "plugins": [
+      "html"
+    ],
+    "rules": {
+      "no-console": "off",
+      "no-unused-vars": "off",
+      "no-undef": "off",
+      "vue/require-v-for-key": "off"
+    },
+    "parserOptions": {
+      "parser": "babel-eslint"
+    }
+  },
+  "browserslist": [
+    "> 1%",
+    "last 2 versions",
+    "not ie > 0",
+    "not ie_mob > 0"
+  ]
 }
