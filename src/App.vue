@@ -48,7 +48,7 @@
     </div>
 
     <v-popup class="popup-site" :title="site.id ? '修改网址' : '添加网址'" v-model="isShowAddEditSite" :confirm="addEditSite">
-      <div class="layout-form" slot="content">
+      <div class="layout-form">
         <div class="v-row">
           <label class="label">分类：</label>
           <v-select :source="categories" v-model="site.categoryId"></v-select>
@@ -72,25 +72,23 @@
     </v-popup>
 
     <v-popup class="popup-manager" title="管理分类与标签" v-model="isShowManager" fixed>
-      <template slot="content">
-        <v-tab :titles="tabs" v-model="managerTab"></v-tab>
-        <div class="mgr-panel">
-          <div class="mod-cat-tree">
-            <div class="t-tip">右键点击操作</div>
-            <div class="t-item" v-for="cat of categories">
-              <div class="i-name" @click.right="showContextMenu($event, cat)"><v-icon icon="folder-flat"></v-icon>{{cat.name}}</div>
-              <div class="i-children">
-                <div class="c-item" v-for="child of cat.children">
-                  <div class="i-name" @click.right="showContextMenu($event, child, cat.id)"><v-icon icon="folder-flat"></v-icon>{{child.name}}</div>
-                </div>
+      <v-tab :titles="tabs" v-model="managerTab"></v-tab>
+      <div class="mgr-panel">
+        <div class="mod-cat-tree">
+          <div class="t-tip">右键点击操作</div>
+          <div class="t-item" v-for="cat of categories">
+            <div class="i-name" @click.right="showContextMenu($event, cat)"><v-icon icon="folder-flat"></v-icon>{{cat.name}}</div>
+            <div class="i-children">
+              <div class="c-item" v-for="child of cat.children">
+                <div class="i-name" @click.right="showContextMenu($event, child, cat.id)"><v-icon icon="folder-flat"></v-icon>{{child.name}}</div>
               </div>
             </div>
-            <div class="t-item">
-              <div class="i-add" @click="startAddCategory"><v-icon icon="plus"></v-icon></div>
-            </div>
+          </div>
+          <div class="t-item">
+            <div class="i-add" @click="startAddCategory"><v-icon icon="plus"></v-icon></div>
           </div>
         </div>
-      </template>
+      </div>
       <div slot="footer"></div>
     </v-popup>
 
@@ -101,9 +99,7 @@
     </div>
 
     <v-popup :title="managerCategoryTitle" v-model="isShowManagerCategory" :confirm="manageCategory" fixed>
-      <template slot="content">
-        <v-input v-model="currentCategoryName" focus></v-input>
-      </template>
+      <v-input v-model="currentCategoryName" focus></v-input>
     </v-popup>
   </div>
 </template>
