@@ -1,6 +1,6 @@
 module.exports = {
   lintOnSave: false,
-  baseUrl: '',
+  publicPath: '',
   pages: {
     index: 'src/main.js'
   },

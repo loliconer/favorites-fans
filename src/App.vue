@@ -1,16 +1,10 @@
 <template>
   <div id="app">
     <div class="container">
-      <div class="search-wrap">
-        <v-search @search="search"></v-search>
-      </div>
-
       <div class="actions">
         <v-button @click="startAddSite">添加</v-button>
         <v-button>导入</v-button>
         <v-button @click="startManage">管理</v-button>
-        <v-button @click="mode = 2" v-if="mode === 1">编辑</v-button>
-        <v-button @click="mode = 1" v-if="mode === 2">查看</v-button>
       </div>
 
       <div class="content">
@@ -18,9 +12,9 @@
           <div class="s-row">
             <div class="r-category">{{cat.name}}</div>
             <div class="r-sites">
-              <div class="site-item" v-for="site of sites[cat.id]">
+              <div class="site-item" v-for="site of sites[cat.id]" @dblclick.self="openEditMode(site)">
                 <a class="link" target="_blank" :href="site.url">{{site.title}}</a>
-                <div class="i-actions" v-if="mode === 2">
+                <div class="i-actions" v-if="site.edit_">
                   <v-button size="sm" @click="startEditSite(site)">修改</v-button>
                   <v-button size="sm" type="danger" @click="deleteSite(site.id, site.categoryId)">删除</v-button>
                 </div>
@@ -30,9 +24,9 @@
           <div class="s-row" v-for="row of cat.children">
             <div class="r-category">{{row.name}}</div>
             <div class="r-sites">
-              <div class="site-item" v-for="site of sites[row.id]">
+              <div class="site-item" v-for="site of sites[row.id]" @dblclick.self="openEditMode(site)">
                 <a class="link" target="_blank" :href="site.url">{{site.title}}</a>
-                <div class="i-actions" v-if="mode === 2">
+                <div class="i-actions" v-if="site.edit_">
                   <v-button size="sm" @click="startEditSite(site)">修改</v-button>
                   <v-button size="sm" type="danger" @click="deleteSite(site.id, site.categoryId)">删除</v-button>
                 </div>
@@ -40,10 +34,6 @@
             </div>
           </div>
         </section>
-        <div class="search-result" v-if="searched.length">
-          <v-icon icon="close" @click.native="closeSearched"></v-icon>
-          <div class="r-site" v-for="site of searched"><a class="link" target="_blank" :href="site.url">{{site.title}}</a></div>
-        </div>
       </div>
     </div>
 
@@ -71,7 +61,7 @@
       </div>
     </v-popup>
 
-    <v-popup class="popup-manager" title="管理分类与标签" v-model="isShowManager" fixed>
+    <v-popup class="popup-manager" title="管理分类与标签" v-model="isShowManager" fixed no-footer>
       <v-tab :titles="tabs" v-model="managerTab"></v-tab>
       <div class="mgr-panel">
         <div class="mod-cat-tree">
@@ -89,7 +79,6 @@
           </div>
         </div>
       </div>
-      <div slot="footer"></div>
     </v-popup>
 
     <div class="v-dropdown" :style="contextStyle" @click.stop v-if="isShowContext">
@@ -140,9 +129,7 @@
           left: 0
         },
         parentId: undefined,
-        selectedCategory: {},
-        mode: 1,
-        searched: []
+        selectedCategory: {}
       }
     },
     components: {
@@ -176,6 +163,9 @@
           sites[site.categoryId].push(site)
         })
         this.sites = sites
+      },
+      openEditMode(site) {
+        this.$set(site, 'edit_', !site.edit_)
       },
       startAddSite() {
         this.site = { tags: [] }
@@ -433,25 +423,6 @@
             return true
           }
         })
-      },
-      search(keywords) {
-        if (keywords === '') return
-
-        const { sites } = this
-        const result = []
-
-        for (let key in sites) {
-          sites[key].forEach(site => {
-            if (site.title.toLowerCase().includes(keywords.toLowerCase())) {
-              result.push(site)
-            }
-          })
-        }
-
-        this.searched = result
-      },
-      closeSearched() {
-        this.searched = []
       }
     },
     created() {
