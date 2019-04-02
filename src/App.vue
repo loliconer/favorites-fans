@@ -229,7 +229,7 @@
       deleteSite(id, categoryId) {
         if (sessionStorage.starter !== this.starter) return this.warn('无权限')
         const { sites } = this
-        this.$modal({
+        this.modal({
           content: '确认删除该网址？',
           fixed: true,
           async confirm() {
@@ -387,7 +387,7 @@
         if (sessionStorage.starter !== this.starter) return this.warn('无权限')
         this.isShowContext = false
         const { categories, selectedCategory } = this
-        this.$modal({
+        this.modal({
           content: '删除分类会同时删除其子分类，确定删除？',
           fixed: true,
           async confirm() {
