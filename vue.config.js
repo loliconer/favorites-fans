@@ -1,9 +1,4 @@
 module.exports = {
-  lintOnSave: false,
-  publicPath: '',
-  pages: {
-    index: 'src/main.js'
-  },
   css: {
     loaderOptions: {
       less: {
@@ -13,22 +8,12 @@ module.exports = {
   },
   configureWebpack: {
     resolve: {
-      // .mjs needed for https://github.com/graphql/graphql-js/issues/1272
-      extensions: ['*', '.mjs', '.js', '.vue', '.json', '.gql', '.graphql']
-    },
-    module: {
-      rules: [ // fixes https://github.com/graphql/graphql-js/issues/1272
-        {
-          test: /\.mjs$/,
-          include: /node_modules/,
-          type: 'javascript/auto'
-        }
-      ]
+      extensions: ['*', '.js', '.vue', '.json']
     }
   },
   devServer: {
     proxy: {
-      '/graphql-luo-wang': {
+      '/api': {
         target: 'http://localhost:4000',
         changeOrigin: true
       }

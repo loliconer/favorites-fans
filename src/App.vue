@@ -1,9 +1,12 @@
 <template>
   <div id="app">
     <div class="container">
+      <div class="logo">
+        <img src="/img/logo.png">
+      </div>
       <div class="actions">
         <v-button @click="startAddSite">添加</v-button>
-        <v-button>导入</v-button>
+        <!--<v-button>导入</v-button>-->
         <v-button @click="startManage">管理</v-button>
       </div>
 
@@ -39,25 +42,25 @@
 
     <v-popup class="popup-site" :title="site.id ? '修改网址' : '添加网址'" v-model="isShowAddEditSite" :confirm="addEditSite">
       <div class="layout-form">
-        <div class="v-row">
+        <v-row>
           <label class="label">分类：</label>
           <v-select :source="categories" v-model="site.categoryId"></v-select>
-        </div>
+        </v-row>
 
-        <div class="v-row">
+        <v-row>
           <label class="label">标题：</label>
           <v-input v-model="site.title"></v-input>
-        </div>
+        </v-row>
 
-        <div class="v-row">
+        <v-row>
           <label class="label">网址：</label>
           <v-input v-model="site.url"></v-input>
-        </div>
+        </v-row>
 
-        <div class="v-row">
+        <!--<v-row>
           <label class="label">标签：</label>
           <v-tag :tags="tags" v-model="site.tags"></v-tag>
-        </div>
+        </v-row>-->
       </div>
     </v-popup>
 
@@ -137,28 +140,15 @@
     },
     methods: {
       async getCategoriesAndSites() {
-        const body = await apolloClient.query({
-          query: gql`query {
-            categories {
-              id
-              name
-              parentId
-            }
-            sites {
-              id
-              title
-              description
-              url
-              categoryId
-            }
-          }`
-        }).catch(this.error2)
+        const body = await Promise.all([
+          $fetch.get('categories'),
+          $fetch.get('sites')
+        ]).catch(this.error)
         if (body === undefined) return
 
-        this.categories = makeTreeData(body.data.categories)
-
+        this.categories = makeTreeData(body[0])
         const sites = {}
-        body.data.sites.forEach(site => {
+        body[1].forEach(site => {
           if (!sites[site.categoryId]) sites[site.categoryId] = []
           sites[site.categoryId].push(site)
         })
@@ -176,75 +166,37 @@
         this.isShowAddEditSite = true
       },
       async addEditSite() {
-        if (sessionStorage.starter !== this.starter) return this.warn('无权限')
         const { site } = this
+        const id = site.id
         delete site.tags
 
-        if (site.id) {
-          const body = await apolloClient.mutate({
-            mutation: gql`mutation ($id: Int!, $site: SiteInput) {
-              updateSite(id: $id, site: $site)
-            }`,
-            variables: {
-              id: site.id,
-              site: {
-                title: site.title,
-                url: site.url,
-                categoryId: site.categoryId
-              }
-            }
-          }).catch(this.error2)
-          if (body === undefined) return
+        const url = id ? `sites/${id}` : 'sites'
+        const method = id ? 'put' : 'post'
+        const body = await $fetch[method](url, site).catch(this.error)
+        if (body === undefined) return
 
-          if (body.data.updateSite === 0) {
-            this.warn('修改的网址不存在')
-            return true
-          }
-
+        if (id) {
           this.success('修改成功')
           this.sites[site.categoryId].forEach((site_, i) => {
-            if (site_.id === site.id) {
+            if (site_.id === id) {
               this.sites[site.categoryId].splice(i, 1, Object.assign({}, site))
             }
           })
-          return true
         } else {
-          const body = await apolloClient.mutate({
-            mutation: gql`mutation ($site: SiteInput) {
-              createSite(site: $site)
-            }`,
-            variables: { site }
-          }).catch(this.error2)
-          if (body === undefined) return
-
           this.success('添加成功')
           if (!this.sites[site.categoryId]) this.sites[site.categoryId] = []
-          this.sites[site.categoryId].push({
-            id: body.data.createSite,
-            ...site
-          })
-          return true
+          this.sites[site.categoryId].push(body)
         }
+        return true
       },
       deleteSite(id, categoryId) {
-        if (sessionStorage.starter !== this.starter) return this.warn('无权限')
         const { sites } = this
         this.modal({
           content: '确认删除该网址？',
           fixed: true,
           async confirm() {
-            const body = await apolloClient.mutate({
-              mutation: gql`mutation ($id: Int!) {
-                deleteSite(id: $id)
-              }`,
-              variables: { id }
-            }).catch(this.error2)
+            const body = await $fetch.delete(`sites/${id}`, {}).catch(this.error)
             if (body === undefined) return
-
-            if (body.data.deleteSite === 0) {
-              this.error('删除的网址不存在')
-              return true
-            }
 
             this.success('删除成功')
             sites[categoryId].forEach((site, i) => {
@@ -269,99 +221,49 @@
         this.isShowContext = true
       },
       async manageCategory() {
-        if (sessionStorage.starter !== this.starter) return this.warn('无权限')
         const { manageCategoryType, currentCategoryName } = this
-        let body
 
         if (currentCategoryName === '') return this.error('名称不能为空')
 
+        let body
         if (manageCategoryType === 'create') {
           const { categories } = this
-          body = await apolloClient.mutate({
-            mutation: gql`mutation ($category: CategoryInput) {
-              createCategory(category: $category) {
-                code
-                success
-                data
-              }
-            }`,
-            variables: {
-              category: {
-                name: currentCategoryName
-              }
-            }
-          }).catch(this.error2)
+          body = await $fetch.post('categories', {
+            name: currentCategoryName
+          }).catch(this.error)
           if (body === undefined) return
 
-          body = body.data.createCategory
-          if (body.success) {
-            this.success('增加成功')
-            categories.push({
-              id: body.data,
-              name: currentCategoryName,
-              value: body.data,
-              children: []
-            })
-            return true
-          }
+          this.success('增加成功')
+          body.value = body.id
+          body.children = []
+          categories.push(body)
         }
 
         if (manageCategoryType === 'createChild') {
           const { selectedCategory } = this
-          body = await apolloClient.mutate({
-            mutation: gql`mutation ($category: CategoryInput) {
-              createCategory(category: $category) {
-                code
-                success
-                data
-              }
-            }`,
-            variables: {
-              category: {
-                name: currentCategoryName,
-                parentId: selectedCategory.id
-              }
-            }
-          }).catch(this.error2)
+          body = await $fetch.post('categories', {
+            name: currentCategoryName,
+            parentId: selectedCategory.id
+          }).catch(this.error)
           if (body === undefined) return
 
-          body = body.data.createCategory
-          if (body.success) {
-            this.success('增加成功')
-            selectedCategory.children.push({
-              id: body.data,
-              name: currentCategoryName,
-              value: body.data,
-              parentId: selectedCategory.id
-            })
-            return true
-          }
+          this.success('增加成功')
+          body.value = body.id
+          selectedCategory.children.push(body)
         }
 
         if (manageCategoryType === 'rename') {
           const { selectedCategory } = this
-          body = await apolloClient.mutate({
-            mutation: gql`mutation ($id: Int!, $category: CategoryInput) {
-              updateCategory(id: $id, category: $category)
-            }`,
-            variables: {
-              id: selectedCategory.id,
-              category: {
-                name: currentCategoryName
-              }
-            }
-          }).catch(this.error2)
+          body = await $fetch.put(`categories/${selectedCategory.id}`, {
+            name: currentCategoryName
+          }).catch(this.error)
           if (body === undefined) return
-
-          if (body.data.updateCategory === 0) {
-            this.error('修改的分类不存在')
-            return true
-          }
 
           this.success('修改成功')
           selectedCategory.name = currentCategoryName
-          return true
         }
+
+        return true
       },
       startAddCategory() {
         this.managerCategoryTitle = '新增分类'
@@ -384,34 +286,20 @@
         this.isShowManagerCategory = true
       },
       startDel() {
-        if (sessionStorage.starter !== this.starter) return this.warn('无权限')
         this.isShowContext = false
         const { categories, selectedCategory } = this
         this.modal({
           content: '删除分类会同时删除其子分类，确定删除？',
           fixed: true,
           async confirm() {
-            const body = await apolloClient.mutate({
-              mutation: gql`mutation ($id: Int!) {
-                deleteCategory(id: $id)
-              }`,
-              variables: {
-                id: selectedCategory.id
-              }
-            }).catch(this.error2)
+            const body = await $fetch.delete(`categories/${selectedCategory.id}`).catch(this.error)
             if (body === undefined) return
-
-            if (body.data.deleteCategory === 0) {
-              this.error('删除的分类不存在')
-              return true
-            }
 
             this.success('删除成功')
             if (!selectedCategory.parentId) {
               categories.forEach((cat, i) => {
                 cat.id === selectedCategory.id && categories.splice(i, 1)
               })
-              return true
             }
 
             categories.forEach(cat => {

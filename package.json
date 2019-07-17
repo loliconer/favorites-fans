@@ -8,21 +8,14 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "apollo-datasource": "^0.5.0",
-    "apollo-server": "^2.6.9",
-    "graphql": "^14.4.2",
-    "nodemon": "^1.19.1",
+    "esm": "^3.2.25",
     "restify": "^8.3.3",
+    "sequelize": "^5.10.1",
     "sqlite3": "^4.0.9"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "^3.9.2",
     "@vue/cli-service": "^3.9.2",
-    "apollo-boost": "^0.4.3",
-    "apollo-cache-inmemory": "^1.6.2",
-    "apollo-client": "^2.6.3",
-    "apollo-link-http": "^1.5.15",
-    "graphql-tag": "^2.10.1",
     "less": "^3.9.0",
     "less-loader": "^5.0.0",
     "lovue": "^3.1.0",
@@ -53,9 +46,8 @@
     }
   },
   "browserslist": [
-    "> 1%",
-    "last 2 versions",
-    "not ie > 0",
-    "not ie_mob > 0"
+    "Chrome >= 70",
+    "Firefox >= 65",
+    "Safari >= 11"
   ]
 }

@@ -1,10 +1,24 @@
-module.exports.paginateResults = ({
-                                    after: cursor,
-                                    pageSize = 20,
-                                    results,
-                                    // can pass in a function to calculate an item's cursor
-                                    getCursor = () => null
-                                  }) => {
+export function makeSequelizeError(error) {
+  let msg
+
+  // SequelizeDatabaseError, SequelizeValidationError, SequelizeTimeoutError, SequelizeUniqueConstraintError
+  switch (error.name) {
+    case 'SequelizeUniqueConstraintError':
+    case 'SequelizeDatabaseError':
+      msg = error.original.message
+      break
+    case 'SequelizeValidationError':
+      msg = error.errors.map(item => item.message).join(', ')
+      break
+    default:
+      msg = error.message
+      break
+  }
+
+  return { code: 1000, msg }
+}
+
+export function paginateResults({ after: cursor, pageSize = 20, results, getCursor = () => null }) {
   if (pageSize < 1) return []
 
   if (!cursor) return results.slice(0, pageSize)
