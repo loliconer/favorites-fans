@@ -1,5 +1,6 @@
 import restify from 'restify'
 import routes from './routes'
+import {auth} from './lib/guard'
 import {makeSequelizeError} from './lib/util'
 
 const server = restify.createServer({
@@ -12,14 +13,14 @@ server.use(restify.plugins.queryParser())
 server.use(restify.plugins.bodyParser())
 
 server.get('/api/categories', routes.category.getAll)
-server.post('/api/categories', routes.category.post)
-server.put('/api/categories/:id', routes.category.put)
-server.del('/api/categories/:id', routes.category.del)
+server.post('/api/categories', auth, routes.category.post)
+server.put('/api/categories/:id', auth, routes.category.put)
+server.del('/api/categories/:id', auth, routes.category.del)
 
 server.get('/api/sites', routes.site.getAll)
-server.post('/api/sites', routes.site.post)
-server.put('/api/sites/:id', routes.site.put)
-server.del('/api/sites/:id', routes.site.del)
+server.post('/api/sites', auth, routes.site.post)
+server.put('/api/sites/:id', auth, routes.site.put)
+server.del('/api/sites/:id', auth, routes.site.del)
 
 server.on('restifyError', function (req, res, err, callback) {
   res.json(makeSequelizeError(err))
