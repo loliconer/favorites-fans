@@ -98,7 +98,7 @@
 
 <script>
   import Tag from 'lovue/src/extension/Tag'
-  import 'lovue/src/less/extension/Tag.less'
+  import {Row, Button, Input, Select, Popup, Tab} from 'lovue/src/index'
   import {makeTreeData} from './js/lib/tools'
 
   export default {
@@ -136,7 +136,13 @@
       }
     },
     components: {
-      [Tag.name]: Tag
+      [Tag.name]: Tag,
+      [Row.name]: Row,
+      [Button.name]: Button,
+      [Input.name]: Input,
+      [Select.name]: Select,
+      [Popup.name]: Popup,
+      [Tab.name]: Tab
     },
     methods: {
       async getCategoriesAndSites() {
