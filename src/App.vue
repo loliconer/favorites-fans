@@ -14,26 +14,32 @@
         <section class="section" v-for="cat of categories">
           <div class="s-row">
             <div class="r-category">{{cat.name}}</div>
-            <div class="r-sites">
-              <div class="site-item" v-for="site of sites[cat.id]" @dblclick.self="openEditMode(site)">
-                <a class="link" target="_blank" :href="site.url">{{site.title}}</a>
-                <div class="i-actions" v-if="site.edit_">
-                  <v-button size="sm" @click="startEditSite(site)">修改</v-button>
-                  <v-button size="sm" type="danger" @click="deleteSite(site.id, site.categoryId)">删除</v-button>
+            <div class="r-sites" @dragenter="dragenterHandler($event, cat.id)" @dragstart="dragstartHandler($event, cat.id)" @drop="dropHandler($event, cat.id)" @dragover="dragoverHandler">
+              <transition-group name="site-item" tag="div" class="site-items">
+                <div class="site-item" v-for="(site, i) of sites[cat.id]" :key="site.id" @dblclick.self="openEditMode(site)" draggable="true" :data-index="i">
+                  <a class="link" target="_blank" :href="site.url">{{site.title}}</a>
+                  <div class="i-actions" v-if="site.edit_">
+                    <v-button size="sm" @click="startEditSite(site)">修改</v-button>
+                    <v-button size="sm" type="danger" @click="deleteSite(site.id, site.categoryId)">删除</v-button>
+                  </div>
                 </div>
-              </div>
+                <div class="site-item add-site-icon" key="add-site-icon" @click="startAddSite(cat.id)"><v-icon icon="plus"></v-icon></div>
+              </transition-group>
             </div>
           </div>
           <div class="s-row" v-for="row of cat.children">
             <div class="r-category">{{row.name}}</div>
-            <div class="r-sites">
-              <div class="site-item" v-for="site of sites[row.id]" @dblclick.self="openEditMode(site)">
-                <a class="link" target="_blank" :href="site.url">{{site.title}}</a>
-                <div class="i-actions" v-if="site.edit_">
-                  <v-button size="sm" @click="startEditSite(site)">修改</v-button>
-                  <v-button size="sm" type="danger" @click="deleteSite(site.id, site.categoryId)">删除</v-button>
+            <div class="r-sites" @dragenter="dragenterHandler($event, row.id)" @dragstart="dragstartHandler($event, row.id)" @drop="dropHandler($event, row.id)" @dragover="dragoverHandler">
+              <transition-group name="site-item" tag="div" class="site-items">
+                <div class="site-item" v-for="(site, i) of sites[row.id]" :key="site.id" @dblclick.self="openEditMode(site)" draggable="true" :data-index="i">
+                  <a class="link" target="_blank" :href="site.url">{{site.title}}</a>
+                  <div class="i-actions" v-if="site.edit_">
+                    <v-button size="sm" @click="startEditSite(site)">修改</v-button>
+                    <v-button size="sm" type="danger" @click="deleteSite(site.id, site.categoryId)">删除</v-button>
+                  </div>
                 </div>
-              </div>
+                <div class="site-item add-site-icon" key="add-site-icon" @click="startAddSite(row.id)"><v-icon icon="plus"></v-icon></div>
+              </transition-group>
             </div>
           </div>
         </section>
@@ -98,7 +104,7 @@
 
 <script>
   import Tag from 'lovue/src/extension/Tag'
-  import {Row, Button, Input, Select, Popup, Tab} from 'lovue/src/index'
+  import {Row, Button, Input, Select, Popup, Tab, Icon} from 'lovue/src/index'
   import {makeTreeData} from './js/lib/tools'
 
   export default {
@@ -132,7 +138,10 @@
           left: 0
         },
         parentId: undefined,
-        selectedCategory: {}
+        selectedCategory: {},
+        draggingCategoryId: 0,
+        draggingSiteIndex: 0,
+        prevDraggingElem: null
       }
     },
     components: {
@@ -142,7 +151,8 @@
       [Input.name]: Input,
       [Select.name]: Select,
       [Popup.name]: Popup,
-      [Tab.name]: Tab
+      [Tab.name]: Tab,
+      [Icon.name]: Icon
     },
     methods: {
       async getCategoriesAndSites() {
@@ -163,8 +173,8 @@
       openEditMode(site) {
         this.$set(site, 'edit_', !site.edit_)
       },
-      startAddSite() {
-        this.site = { tags: [] }
+      startAddSite(categoryId) {
+        this.site = { categoryId, tags: [] }
         this.isShowAddEditSite = true
       },
       startEditSite(site) {
@@ -317,6 +327,59 @@
             return true
           }
         })
+      },
+      dragstartHandler(ev, categoryId) {
+        this.draggingCategoryId = categoryId
+        for (let elem of ev.path) {
+          if (elem.classList.contains('site-item')) {
+            this.draggingSiteIndex = +elem.dataset.index
+            break
+          }
+          if (elem.classList.contains('r-sites')) break
+        }
+      },
+      dragenterHandler(ev, categoryId) {
+        if (this.draggingCategoryId !== categoryId) return
+        if (this.prevDraggingElem) this.prevDraggingElem.style.borderLeft = '1px solid var(--border-color)'
+
+        for (let elem of ev.path) {
+          if (elem.classList.contains('add-site-icon')) break
+          if (elem.classList.contains('r-sites')) break
+
+          if (elem.classList.contains('site-item')) {
+            elem.style.borderLeft = '4px solid var(--blue-color)'
+            this.prevDraggingElem = elem
+            break
+          }
+        }
+      },
+      dropHandler(ev, categoryId) {
+        const { draggingSiteIndex, draggingCategoryId, sites } = this
+        if (draggingCategoryId !== categoryId) return
+
+        const sitesList = sites[draggingCategoryId]
+        for (let elem of ev.path) {
+          if (elem.classList.contains('add-site-icon')) break
+          if (elem.classList.contains('r-sites')) break
+
+          if (elem.classList.contains('site-item')) {
+            elem.style.borderLeft = '1px solid var(--border-color)'
+            this.prevDraggingElem = null
+
+            const enterSiteIndex = +elem.dataset.index
+            const draggingSite = sitesList[draggingSiteIndex]
+            sitesList.splice(draggingSiteIndex, 1)
+            if (draggingSiteIndex >= enterSiteIndex) { // 向左移动
+              sitesList.splice(enterSiteIndex, 0, draggingSite)
+            } else { // 向右移动
+              sitesList.splice(enterSiteIndex - 1, 0, draggingSite)
+            }
+            break
+          }
+        }
+      },
+      dragoverHandler(ev) {
+        ev.preventDefault()
       }
     },
     created() {

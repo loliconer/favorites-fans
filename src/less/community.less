@@ -101,11 +101,14 @@
 
       .r-sites {
         flex: 1;
-        display: flex;
-        flex-wrap: wrap;
-        justify-content: flex-start;
         padding: var(--2unit);
         border-bottom: 1px solid var(--border-color);
+
+        .site-items {
+          display: flex;
+          flex-wrap: wrap;
+          justify-content: flex-start;
+        }
 
         .site-item {
           display: flex;
@@ -130,6 +133,15 @@
             .v-btn {
               margin: 0 4px;
             }
+          }
+        }
+
+        .add-site-icon {
+          opacity: 0;
+          cursor: pointer;
+
+          &:hover {
+            opacity: 1;
           }
         }
       }
@@ -187,4 +199,8 @@
   .d-item {
     cursor: pointer;
   }
+}
+
+.site-item-move {
+  transition: transform .3s;
 }
