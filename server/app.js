@@ -21,6 +21,7 @@ server.get('/api/sites', routes.site.getAll)
 server.post('/api/sites', auth, routes.site.post)
 server.put('/api/sites/:id', auth, routes.site.put)
 server.del('/api/sites/:id', auth, routes.site.del)
+server.put('/api/sites-order', routes.site.putOrder)
 
 server.on('restifyError', function (req, res, err, callback) {
   res.json(makeSequelizeError(err))

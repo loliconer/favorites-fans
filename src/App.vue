@@ -168,7 +168,16 @@
           if (!sites[site.categoryId]) sites[site.categoryId] = []
           sites[site.categoryId].push(site)
         })
-        this.sites = sites
+        this.sites = this.sortSites(sites)
+      },
+      sortSites(sites) {
+        for (let key in sites) {
+          sites[key] = sites[key].sort((a, b) => {
+            if (a.serialNo === null || b.serialNo === null) return -1
+            return a.serialNo - b.serialNo
+          })
+        }
+        return sites
       },
       openEditMode(site) {
         this.$set(site, 'edit_', !site.edit_)
@@ -358,6 +367,8 @@
         if (draggingCategoryId !== categoryId) return
 
         const sitesList = sites[draggingCategoryId]
+        const backupList = sitesList.slice()
+        let startUpdateIndex
         for (let elem of ev.path) {
           if (elem.classList.contains('add-site-icon')) break
           if (elem.classList.contains('r-sites')) break
@@ -368,18 +379,41 @@
 
             const enterSiteIndex = +elem.dataset.index
             const draggingSite = sitesList[draggingSiteIndex]
+
+            if (draggingSiteIndex === enterSiteIndex) return
+
             sitesList.splice(draggingSiteIndex, 1)
-            if (draggingSiteIndex >= enterSiteIndex) { // 向左移动
+            if (draggingSiteIndex > enterSiteIndex) { // 向左移动
               sitesList.splice(enterSiteIndex, 0, draggingSite)
+              startUpdateIndex = enterSiteIndex
             } else { // 向右移动
               sitesList.splice(enterSiteIndex - 1, 0, draggingSite)
+              startUpdateIndex = draggingSiteIndex
             }
             break
           }
         }
+
+        this.updateSites(sitesList, startUpdateIndex, draggingCategoryId, backupList)
       },
       dragoverHandler(ev) {
         ev.preventDefault()
+      },
+      async updateSites(sites, startUpdateIndex, categoryId, backupList) {
+        const updatingSites = []
+        sites.forEach((site, index) => {
+          if (index < startUpdateIndex) return
+          updatingSites.push({
+            id: site.id,
+            serialNo: index
+          })
+        })
+        const body = await $fetch.put('sites-order', {
+          sites: updatingSites
+        }).catch(this.error)
+        if (body === undefined) {
+          this.sites[categoryId] = backupList
+        }
       }
     },
     created() {

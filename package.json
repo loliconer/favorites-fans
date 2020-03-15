@@ -8,15 +8,17 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@lovue/utils": "^1.0.0",
+    "core-js": "^3.6.4",
     "esm": "^3.2.25",
     "restify": "^8.5.1",
-    "sequelize": "^5.21.3",
+    "sequelize": "^5.21.5",
     "sqlite3": "^4.1.1"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^3.12.1",
-    "@vue/cli-service": "^3.12.1",
-    "less": "^3.10.3",
+    "@vue/cli-plugin-babel": "~4.2.3",
+    "@vue/cli-service": "~4.2.3",
+    "less": "^3.11.1",
     "less-loader": "^5.0.0",
     "lovue": "^3.1.2",
     "vue": "^2.6.11",
