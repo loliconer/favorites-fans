@@ -104,7 +104,6 @@
 
 <script>
   import Tag from 'lovue/src/extension/Tag'
-  import {Row, Button, Input, Select, Popup, Tab, Icon} from 'lovue/src/index'
   import {makeTreeData} from './js/lib/tools'
 
   export default {
@@ -145,14 +144,7 @@
       }
     },
     components: {
-      [Tag.name]: Tag,
-      [Row.name]: Row,
-      [Button.name]: Button,
-      [Input.name]: Input,
-      [Select.name]: Select,
-      [Popup.name]: Popup,
-      [Tab.name]: Tab,
-      [Icon.name]: Icon
+      [Tag.name]: Tag
     },
     methods: {
       async getCategoriesAndSites() {
@@ -191,9 +183,12 @@
         this.isShowAddEditSite = true
       },
       async addEditSite() {
-        const { site } = this
+        const { sites } = this
+        const site = Object.assign({}, this.site)
         const id = site.id
         delete site.tags
+
+        if (!id) site.serialNo = sites[site.categoryId].length
 
         const url = id ? `sites/${id}` : 'sites'
         const method = id ? 'put' : 'post'

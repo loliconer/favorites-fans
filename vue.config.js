@@ -1,12 +1,8 @@
 module.exports = {
-  css: {
-    loaderOptions: {
-      less: {
-        strictMath: 'on'
-      }
-    }
-  },
   configureWebpack: {
+    externals: {
+      vue: 'Vue'
+    },
     resolve: {
       extensions: ['*', '.js', '.vue', '.json']
     }
