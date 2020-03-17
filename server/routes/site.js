@@ -6,8 +6,8 @@ export default {
     if (body !== undefined) res.json({ code: 0, data: body })
   },
   async post(req, res, next) {
-    const { categoryId, title, url } = req.body
-    const body = await Site.create({ categoryId, title, url }).catch(next)
+    const { categoryId, title, url, serialNo } = req.body
+    const body = await Site.create({ categoryId, title, url, serialNo }).catch(next)
     if (body !== undefined) res.json({ code: 0, data: body })
   },
   async put(req, res, next) {
