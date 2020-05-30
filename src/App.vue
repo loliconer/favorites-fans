@@ -188,7 +188,10 @@
         const id = site.id
         delete site.tags
 
-        if (!id) site.serialNo = sites[site.categoryId].length
+        if (!id) {
+          if (!sites[site.categoryId]) sites[site.categoryId] = []
+          site.serialNo = sites[site.categoryId].length
+        }
 
         const url = id ? `sites/${id}` : 'sites'
         const method = id ? 'put' : 'post'
@@ -241,7 +244,7 @@
         this.isShowContext = true
       },
       async manageCategory() {
-        const { manageCategoryType, currentCategoryName } = this
+        const { manageCategoryType, currentCategoryName, sites } = this
 
         if (currentCategoryName === '') return this.error('名称不能为空')
 
@@ -257,6 +260,7 @@
           body.value = body.id
           body.children = []
           categories.push(body)
+          sites[body.id] = []
         }
 
         if (manageCategoryType === 'createChild') {
@@ -269,6 +273,7 @@
 
           this.success('增加成功')
           body.value = body.id
+          sites[body.id] = []
           selectedCategory.children.push(body)
         }
 
